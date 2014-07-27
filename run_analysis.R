@@ -43,9 +43,10 @@ train<-train[,c(1:7,42.47,82:87,122:127,162:167,202,203,215,216,228,229,
 # Combine the test and trinaing data
 data<-rbind(train,test)
 
+write.csv(data,"TidyDataSet.csv")
+
 print(str(data))
 print(summary(data))
-
 
 #############################################
 
@@ -75,6 +76,9 @@ AvgWalkUpstairs<-colMeans(upstairs[,-1])
 #create a single data frame
 averages<-rbind(AvgStand,AvgSit,AvgLay,AvgWalk,AvgWalkDownstairs,AvgWalkUpstairs)
 colnames(averages)<-columnNames
+
+
+write.csv(averages,"AvgTidyDataSet.csv")
 
 print(str(averages))
 print(summary(averages))
