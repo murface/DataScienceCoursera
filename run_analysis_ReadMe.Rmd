@@ -1,0 +1,130 @@
+---
+title: "run_analysis.R ReadMe"
+output:
+  html_document:
+    keep_md: yes
+---
+
+I begin my code by cleaning up the global environment and loading the plyr package.  
+Note: the Samsung data must be in the home directory.  
+
+```{r}
+rm(list=ls())
+library(plyr)
+```
+
+Next, 
+    - I read in the test data and the features and activity information.  
+    - Assign the feature descriptions as the column names on the test data.  
+    - Using join() from the plyr package, join the activity and test data.  
+    - Column bind the activity description and the test data.  
+    - Take only the columns expressing: Activity description, Feature mean, Feature standard deviation  
+```{r}
+# Read in test data and labels
+features<-read.table("features.txt")
+test<-read.table("X_test.txt")
+# Add feature names as column headers
+colnames(test)<-features[,2]
+# Read in activity labels and data
+testLabels<-read.table("y_test.txt")
+colnames(testLabels)<-"ActivityCode"
+activityLabels<-read.table("activity_labels.txt")
+colnames(activityLabels)<-c("ActivityCode","Activity")
+# Add acitvity name to training data
+activity<-join(testLabels,activityLabels,by="ActivityCode")
+test<-cbind(activity$Activity,test)
+colnames(test)[1]<-"Activity"
+test<-test[,c(1:7,42.47,82:87,122:127,162:167,202,203,215,216,228,229,
+              241,242,254,255,267:272,346:351,425:430,504,505,517,518,
+              530,531,543,544)]
+```
+
+Next,  
+    - Use the same procedure on the training data.  
+```{r}
+# Read in training data and labels
+features<-read.table("features.txt")
+train<-read.table("X_train.txt")
+# Add feature names as column headers
+colnames(train)<-features[,2]
+# Read in activity labels and data
+trainingLabels<-read.table("y_train.txt")
+colnames(trainingLabels)<-"ActivityCode"
+activityLabels<-read.table("activity_labels.txt")
+colnames(activityLabels)<-c("ActivityCode","Activity")
+# Add acitvity name to training data
+activity<-join(trainingLabels,activityLabels,by="ActivityCode")
+train<-cbind(activity$Activity,train)
+colnames(train)[1]<-"Activity"
+train<-train[,c(1:7,42.47,82:87,122:127,162:167,202,203,215,216,228,229,
+              241,242,254,255,267:272,346:351,425:430,504,505,517,518,
+              530,531,543,544)]
+```
+    
+Use rbind to combine the two data sets in to a single data set.  
+Write the tidy data to a .txt comma seperated file in the home directory.  
+Print the str() and summary() of the tidy data set.  
+```{r, echo=FALSE}
+# Combine the test and trinaing data
+data<-rbind(train,test)
+
+write.table(data,"TidyDataSet.txt",sep=",")
+
+print(str(data))
+print(summary(data))    
+```    
+    
+Next,  
+We will create a second data sets that comprises the means of each Feature by Activity type.  
+
+Start by creating a new data frame with the proper row names and get column names.  
+
+```{r}
+#Subsets of data by Activity type
+
+columnNames<-names(train)[2:62]
+activities<-c("STANDING","SITTING","LAYING","WALKING",
+              "WALKING_DOWNSTAIRS","WALKING_UPSTAIRS")
+averages<-data.frame(row.names=activities)
+```
+
+Subset the tidy data by Activity description.  
+Take the mean of each feature throughout the subsets.  
+
+```{r}
+stand<-data[data$Activity=="STANDING",]
+sit<-data[data$Activity=="SITTING",]
+lay<-data[data$Activity=="LAYING",]
+walk<-data[data$Activity=="WALKING",]
+downstairs<-data[data$Activity=="WALKING_DOWNSTAIRS",]
+upstairs<-data[data$Activity=="WALKING_UPSTAIRS",]
+
+# Data Frame of Averages by Activity and Feature
+AvgStand<-colMeans(stand[,-1])
+AvgSit<-colMeans(sit[,-1])
+AvgLay<-colMeans(lay[,-1])
+AvgWalk<-colMeans(walk[,-1])
+AvgWalkDownstairs<-colMeans(downstairs[,-1])
+AvgWalkUpstairs<-colMeans(upstairs[,-1])
+```
+   
+Create a new data sets by using rbind() to combine the colMeans() results.  
+Add the column names.  
+Write the new data set to a comma seperated .txt file in the home directory.  
+Print the str() and summary() of the new data set.  
+   
+```{r, echo=FALSE}   
+#create a single data frame
+averages<-rbind(AvgStand,AvgSit,AvgLay,AvgWalk,AvgWalkDownstairs,AvgWalkUpstairs)
+colnames(averages)<-columnNames
+
+
+write.table(averages,"AvgTidyDataSet.txt",sep=",")
+
+print(str(averages))
+print(summary(averages))
+```   
+   
+   
+    
+    
