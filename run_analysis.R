@@ -43,7 +43,7 @@ train<-train[,c(1:7,42.47,82:87,122:127,162:167,202,203,215,216,228,229,
 # Combine the test and trinaing data
 data<-rbind(train,test)
 
-write.txt(data,"TidyDataSet.txt")
+write.table(data,"TidyDataSet.txt")
 
 print(str(data))
 print(summary(data))
